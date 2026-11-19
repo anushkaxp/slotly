@@ -1,0 +1,41 @@
+
+from datetime import datetime, timedelta, timezone
+
+import jwt
+
+from app.core.config import settings
+
+
+def create_access_token(user_id: int) -> str:
+    expires_at = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    payload = {
+        "sub": str(user_id),
+        "exp": expires_at,
+        "iat": datetime.now(timezone.utc),
+    }
+
+    return jwt.encode(
+        payload,
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+
+
+def decode_access_token(token: str) -> dict:
+    return jwt.decode(
+        token,
+        settings.JWT_SECRET_KEY,
+        algorithms=[settings.JWT_ALGORITHM],
+    )
+
+
+
+
+# sub identifies the user. We store it as a string because JWT subject claims are expected to be strings.
+# exp sets the token expiry time.
+# iat records when the token was issued.
+# jwt.encode() signs the token.
+# jwt.decode() verifies its signature and expiry.
